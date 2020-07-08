@@ -1,24 +1,23 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-#!/bin/bash
 FROM docker.io/s390x/clefos:latest
+
+#Update OS Packages
+#RUN  rpmkeys --import "http://pool.sks-keyservers.net/pks/lookup?op=get&search=0x3fa7e0328081bff6a14da29aa6a19b38d3d831ef"
+#RUN su -c 'curl https://download.mono-project.com/repo/centos7-stable.repo | tee /etc/yum.repos.d/mono-centos7-stable.repo'
 RUN yum install mono-devel xsp -y
-#FROM mcr.microsoft.com/dotnet/core/aspnet:2.1-stretch-slim AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
-#FROM mcr.microsoft.com/dotnet/core/sdk:2.1-stretch AS build
-WORKDIR /src
-COPY ["s390xdocker.csproj", ""]
-#RUN dotnet restore "./s390xdocker.csproj"
-COPY . .
-WORKDIR "/src/."
-RUN dotnet build "s390xdocker.csproj" -c Release -o /app/build
+#Testing -1 
+RUN csharp -e 'new System.Net.WebClient ().DownloadString ("https://www.nuget.org")'
 
-FROM build AS publish
-RUN dotnet publish "s390xdocker.csproj" -c Release -o /app/publish
+#Testing -2
+RUN mkdir -p scripts
+ADD hello.cs scripts/hello.cs
+RUN mcs scripts/hello.cs
+RUN mono scripts/hello.exe
 
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "s390xdocker.dll"]
+
+VOLUME /app
+WORKDIR /usr/lib/xsp/test
+#ADD samp.aspx app/samp.aspx
+
+EXPOSE 9090
+ENTRYPOINT [ "xsp4","--port","9090","--nonstop"]
