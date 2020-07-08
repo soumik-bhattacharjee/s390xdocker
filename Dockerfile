@@ -10,9 +10,11 @@ RUN csharp -e 'new System.Net.WebClient ().DownloadString ("https://www.nuget.or
 
 #Testing -2
 RUN mkdir -p scripts
-ADD hello.cs scripts/hello.cs
-RUN mcs scripts/hello.cs
-RUN mono scripts/hello.exe
+ADD Program.cs scripts/Program.cs
+ADD Startup.cs scripts/Startup.cs
+RUN mcs scripts/Program.cs
+RUN mcs scripts/Startup.cs
+RUN mono scripts/s390xdocker.exe
 
 
 VOLUME /app
